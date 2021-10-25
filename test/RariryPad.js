@@ -110,4 +110,49 @@ describe("RarityPad", () => {
 			).to.revertedWith("Ownable: caller is not the owner");
 		});
 	});
+
+	describe("getTax()", () => {
+		it("should calculate tax properly", async () => {
+			const _amount = 100;
+			const FEE_AMOUNT = parseInt(await this.rarp.FEE_AMOUNT());
+			const FEE_DIVISOR = parseInt(await this.rarp.FEE_DIVISOR());
+			const { _finalAmount, _taxAmount } = await this.rarp.getTax(
+				toWei(_amount)
+			);
+
+			expect(parseInt(fromWei(_finalAmount))).to.equal(
+				_amount - (_amount * FEE_AMOUNT) / FEE_DIVISOR
+			);
+
+			expect(parseInt(fromWei(_taxAmount))).to.equal(
+				(_amount * FEE_AMOUNT) / FEE_DIVISOR
+			);
+		});
+	});
+
+	describe("transfer()", () => {
+		beforeEach(async () => {
+			await this.rarp.connect(deployer).setFeeReceiver(feeReceiver.address);
+		});
+
+		it("should transfer token between accounts", async () => {
+			await expect(() =>
+				this.rarp.connect(deployer).transfer(user1.address, toWei(1000))
+			).to.changeTokenBalances(
+				this.rarp,
+				[deployer, user1, feeReceiver],
+				[toWei(-1000), toWei(900), toWei(100)]
+			);
+		});
+
+		it("should not charge tax on excluded", async () => {
+			await expect(() =>
+				this.rarp.connect(deployer).transfer(this.rarp.address, toWei(1000))
+			).to.changeTokenBalances(
+				this.rarp,
+				[deployer, this.rarp, feeReceiver],
+				[toWei(-1000), toWei(1000), toWei(0)]
+			);
+		});
+	});
 });

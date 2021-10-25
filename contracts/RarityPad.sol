@@ -3,13 +3,14 @@ pragma solidity 0.8.9;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 contract RarityPad is ERC20, Ownable {
     uint256 public FEE_AMOUNT;
     uint256 public FEE_DIVISOR;
     address public FEE_RECEIVER;
 
-    mapping(address => bool) public excluded;
+    mapping(address /* account */ => bool /* status */) public excluded;
 
     event Fee(uint256 oldFeeAmount, uint256 oldFeeDivisor, uint256 newFeeAmount, uint256 newFeeDivisor);
     event FeeReceiver(address oldFeeReceiver, address indexed _newFeeReceiver);
@@ -43,8 +44,8 @@ contract RarityPad is ERC20, Ownable {
 
     function setExcluded(address _account, bool  _status) external onlyOwner {
         require(_account != address(0), "RarityPad: Address can not be zero address");
-        excluded[_account] = _status;
         emit Excluded(_account, _status);
+        excluded[_account] = _status;
     }
 
     function getTax(uint256 _amount) public view returns(uint256 _finalAmount, uint256 _taxAmount) {
@@ -55,8 +56,14 @@ contract RarityPad is ERC20, Ownable {
 
     // modify _transfer behavior 
     function _transfer(address sender, address recipient, uint256 amount) internal virtual override {
-        (uint256 _finalAmount, uint256 _taxAmount) = getTax(amount);
-        super._transfer(sender, FEE_RECEIVER, _taxAmount);
+        uint256 _finalAmount = amount;
+        uint256 _taxAmount = 0;
+
+        if(!excluded[sender] || !excluded[recipient]) 
+            (_finalAmount, _taxAmount) = getTax(amount);
+
         super._transfer(sender, recipient, _finalAmount);
+        if(_taxAmount > 0) super._transfer(sender, FEE_RECEIVER, _taxAmount);
+
     }
 }

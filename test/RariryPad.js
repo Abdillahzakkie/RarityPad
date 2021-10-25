@@ -136,12 +136,16 @@ describe("RarityPad", () => {
 		});
 
 		it("should transfer token between accounts", async () => {
+			const _amount = 1000;
+			const { _finalAmount, _taxAmount } = await this.rarp.getTax(
+				toWei(_amount)
+			);
 			await expect(() =>
-				this.rarp.connect(deployer).transfer(user1.address, toWei(1000))
+				this.rarp.connect(deployer).transfer(user1.address, toWei(_amount))
 			).to.changeTokenBalances(
 				this.rarp,
 				[deployer, user1, feeReceiver],
-				[toWei(-1000), toWei(900), toWei(100)]
+				[toWei(-1000), _finalAmount, _taxAmount]
 			);
 		});
 

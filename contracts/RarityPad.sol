@@ -49,6 +49,7 @@ contract RarityPad is ERC20, Ownable {
     }
 
     function getTax(uint256 _amount) public view returns(uint256 _finalAmount, uint256 _taxAmount) {
+        if(FEE_AMOUNT == 0 || FEE_DIVISOR == 0) return (_amount, 0);
         _taxAmount = (_amount * FEE_AMOUNT) / FEE_DIVISOR;
         _finalAmount = _amount - _taxAmount;
     }

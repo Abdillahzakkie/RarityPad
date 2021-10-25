@@ -19,5 +19,14 @@
 	"devDependencies": {
 		"dotenv": "^10.0.0",
 		"hardhat-gas-reporter": "^1.0.4"
-	}
+	},
+	"keywords": [
+		"blockchain",
+		"smart-contract",
+		"ethereum",
+		"hardhat",
+		"ERC20",
+		"RarityPad",
+		"RARP"
+	]
 }

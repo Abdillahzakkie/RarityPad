@@ -5,7 +5,8 @@
 	"license": "MIT",
 	"scripts": {
 		"compile": "hardhat compile",
-		"test": "hardhat test"
+		"test": "hardhat test",
+		"flatten": "hardhat flatten contracts/RarityPad.sol > contracts/flatten/RarityPad.sol"
 	},
 	"dependencies": {
 		"@nomiclabs/hardhat-ethers": "^2.0.2",
